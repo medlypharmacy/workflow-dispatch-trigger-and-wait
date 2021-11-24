@@ -1,6 +1,6 @@
 {
-  "name": "workflow-dispatch-and-wait",
-  "version": "2.1.1",
+  "name": "workflow-dispatch-trigger-and-wait",
+  "version": "1.0.0",
   "description": "Trigger running GitHub Actions workflows and wait for result",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "worflow",
     "trigger"
   ],
-  "author": "Aurélien Baudet",
+  "author": "Shrirang Pinjarkar",
   "license": "MIT",
   "devDependencies": {
     "@actions/core": "^1.2.6",
