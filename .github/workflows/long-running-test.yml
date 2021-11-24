@@ -1,0 +1,36 @@
+name: Long running test
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo-branch:
+        description: "Branch of the repository that triggered this workflow"
+        required: true
+      workflow-dispatch-details:
+        description: "Workflow Dispatch Details"
+        required: true
+      repo-name:
+        description: "Repository Name"
+        required: true
+      ref-name:
+        description: "The pull request that triggered this workflow"
+        required: true
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep
+        run: sleep 10s
+      - name: Repo Branch
+        run: |
+          echo ${{ github.event.inputs.repo-branch }}
+      - name: Workflow Dispatch Details
+        run: |
+          echo "${{ github.event.inputs.workflow-dispatch-details }}"
+      - name: Repo Name
+        run: |
+          echo ${{ github.event.inputs.repo-name }}
+      - name: Ref Name
+        run: |
+          echo ${{ github.event.inputs.ref-name }}

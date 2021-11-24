@@ -1,0 +1,156 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+      - name: Build with ncc
+        run: |
+          npm install -g yarn
+          yarn install
+          yarn run build
+      - name: Archive dist
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: dist
+
+  do-not-wait-for-completion-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: "do-not-wait-for-completion-test [trigger|by workflow name]"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download dist
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
+      - name: Invoke do-not-wait-for-completion-test workflow using this action (do not wait for completion)
+        uses: ./
+        with:
+          workflow: do-not-wait-for-completion-test.yaml
+          token: ${{ secrets.CLONE_MEDLY_PRIVATE_REPOS_TOKEN }}
+          inputs: '{"message": "Do not wait for completion"}'
+          wait-for-completion: false
+          repo-name: ${{github.repository}}
+          actor-name: ${{github.actor}}
+          ref-name: ${{github.ref}}
+          head-ref-name: ${{github.ref}}
+          base-ref-name: ${{github.ref}}
+
+  long-running-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: "long-running-test [trigger+wait|by workflow filename|should succeed]"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download dist
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
+      - name: Invoke 'long-running' workflow and wait for result using this action
+        id: long-running-workflow
+        uses: ./
+        with:
+          workflow: long-running-test.yml
+          token: ${{ secrets.CLONE_MEDLY_PRIVATE_REPOS_TOKEN }}
+          wait-for-completion-interval: 10s
+          wait-for-completion-timeout: 2m
+          repo-name: ${{github.repository}}
+          actor-name: ${{github.actor}}
+          ref-name: ${{github.ref}}
+          head-ref-name: ${{github.ref}}
+          base-ref-name: ${{github.ref}}
+        continue-on-error: true
+      - name: Workflow Conclusion
+        run: echo '${{steps.long-running-workflow.outputs.workflow-conclusion}}'
+      - name: Workflow Outcome
+        run: echo '${{steps.long-running-workflow.outcome}}'
+      - name: The 'long-running-test' test case failed because workflow triggered is not successful
+        run: |
+          exit 1
+        if: steps.long-running-workflow.outputs.workflow-conclusion != 'success' && steps.long-running-workflow.outcome != 'success'
+
+  failing-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: "failing-test [trigger+wait|by workflow filename|shoud report failure]"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download dist
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
+      - name: Invoke 'failing' workflow and wait for result using this action
+        id: failing-workflow
+        uses: ./
+        with:
+          workflow: failing-test.yml
+          token: ${{ secrets.CLONE_MEDLY_PRIVATE_REPOS_TOKEN }}
+          wait-for-completion-interval: 10s
+          wait-for-completion-timeout: 2m
+          repo-name: ${{github.repository}}
+          actor-name: ${{github.actor}}
+          ref-name: ${{github.ref}}
+          head-ref-name: ${{github.ref}}
+          base-ref-name: ${{github.ref}}
+        continue-on-error: true
+      - name: Workflow Conclusion
+        run: echo '${{steps.failing-workflow.outputs.workflow-conclusion}}'
+      - name: Workflow Outcome
+        run: echo '${{steps.failing-workflow.outcome}}'
+      - name: The 'failing-test' should fail but instead run successfully
+        run: |
+          exit 1
+        if: steps.failing-workflow.outputs.workflow-conclusion != 'failure' && steps.failing-workflow.outcome != 'failure'
+
+  timeout-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: "timeout-test [trigger+wait|by workflow filename|shoud report timed_out]"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Download dist
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
+      - name: Invoke 'timeout-test' workflow and wait for result using this action
+        id: timeout-workflow
+        uses: ./
+        with:
+          workflow: timeout-test.yml
+          token: ${{ secrets.CLONE_MEDLY_PRIVATE_REPOS_TOKEN }}
+          wait-for-completion-interval: 10s
+          wait-for-completion-timeout: 30s
+          repo-name: ${{github.repository}}
+          actor-name: ${{github.actor}}
+          ref-name: ${{github.ref}}
+          head-ref-name: ${{github.ref}}
+          base-ref-name: ${{github.ref}}
+        continue-on-error: true
+      - name: Workflow Conclusion
+        run: echo '${{steps.timeout-workflow.outputs.workflow-conclusion}}'
+      - name: Workflow Outcome
+        run: echo '${{steps.timeout-workflow.outcome}}'
+      - name: The 'timeout-test' test case's status should be timedout but instead run successfully
+        run: |
+          exit 1
+        if: steps.timeout-workflow.outputs.workflow-conclusion == 'timed_out' && steps.timeout-workflow.outcome == 'timed_out'
