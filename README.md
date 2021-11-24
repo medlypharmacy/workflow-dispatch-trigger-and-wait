@@ -29,7 +29,7 @@ All values must be strings (even if they are used as booleans or numbers in the 
 
 ### `ref`
 
-**Optional.** The Git reference used with the triggered workflow run. The reference can be a branch, tag, or a commit SHA. If omitted the context ref of the triggering workflow is used. If you want to trigger on pull requests and run the target workflow in the context of the pull request branch, set the ref to `${{ github.event.pull_request.head.ref }}`. Note please give default branch name `master` or `main`. Default value is `master`.
+**Required.** The Git reference used with the triggered workflow run. The reference can be a branch, tag, or a commit SHA. If omitted the context ref of the triggering workflow is used. If you want to trigger on pull requests and run the target workflow in the context of the pull request branch, set the ref to `${{ github.event.pull_request.head.ref }}`. **Note please give default branch name `master` or `main`. Default value is `master`.**
 
 ### `token`
 
