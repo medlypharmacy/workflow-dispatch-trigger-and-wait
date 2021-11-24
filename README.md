@@ -11,13 +11,25 @@ _Note 1._ The GitHub UI will report flows triggered by this action as "manually 
 
 _Note 2._ If you want to reference the target workflow by ID, you will need to list them with the following REST API call `curl https://api.github.com/repos/{{owner}}/{{repo}}/actions/workflows -H "Authorization: token {{pat-token}}"`
 
-_This action is a fork of `benc-uk/workflow-dispatch` to add support for waiting for workflow completion._
+_This action is a fork of `aurelien-baudet/workflow-dispatch` to add support for customized job name of workflow triggered by workflow dispatch._
 
 ## Inputs
 
 ### `workflow`
 
 **Required.** The name or the filename or ID of the workflow to trigger and run.
+
+
+
+All values must be strings (even if they are used as booleans or numbers in the triggered workflow). The triggered workflow should use `fromJson` function to get the right type
+
+### `repo`
+
+**Optional.** The default behavior is to trigger workflows in the same repo as the triggering workflow, if you wish to trigger in another GitHub repo "externally", then provide the owner + repo name with slash between them e.g. `microsoft/vscode`
+
+### `ref`
+
+**Optional.** The Git reference used with the triggered workflow run. The reference can be a branch, tag, or a commit SHA. If omitted the context ref of the triggering workflow is used. If you want to trigger on pull requests and run the target workflow in the context of the pull request branch, set the ref to `${{ github.event.pull_request.head.ref }}`. Note please give default branch name `master` or `main`. Default value is `master`.
 
 ### `token`
 
@@ -49,19 +61,9 @@ The solution is to manually create a PAT and store it as a secret e.g. `${{ secr
 
 **Optional.** The inputs to pass to the workflow (if any are configured), this must be a JSON encoded string, e.g. `{ "myInput": "foobar" }`.
 
-All values must be strings (even if they are used as booleans or numbers in the triggered workflow). The triggered workflow should use `fromJson` function to get the right type
-
-### `ref`
-
-**Optional.** The Git reference used with the triggered workflow run. The reference can be a branch, tag, or a commit SHA. If omitted the context ref of the triggering workflow is used. If you want to trigger on pull requests and run the target workflow in the context of the pull request branch, set the ref to `${{ github.event.pull_request.head.ref }}`
-
-### `repo`
-
-**Optional.** The default behavior is to trigger workflows in the same repo as the triggering workflow, if you wish to trigger in another GitHub repo "externally", then provide the owner + repo name with slash between them e.g. `microsoft/vscode`
-
 ### `wait-for-completion`
 
-**Optional.** If `true`, this action will actively poll the workflow run to get the result of the triggered workflow. It is enabled by default. If the triggered workflow fails due to either `failure`, `timed_out` or `cancelled` then the step that has triggered the other workflow will be marked as failed too.
+**Optional.** If `true`, this action will actively poll the workflow run to get the result of the triggered workflow. It is `true` or enabled by default. If the triggered workflow fails due to either `failure`, `timed_out` or `cancelled` then the step that has triggered the other workflow will be marked as failed too.
 
 ### `wait-for-completion-timeout`
 
@@ -74,7 +76,7 @@ All values must be strings (even if they are used as booleans or numbers in the 
 
 ### `display-workflow-run-url`
 
-**Optional.** If `true`, it displays in logs the URL of the triggered workflow. It is useful to follow the progress of the triggered workflow. It is enabled by default.
+**Optional.** If `true`, it displays in logs the URL of the triggered workflow. It is useful to follow the progress of the triggered workflow. It is `true` or enabled by default.
 
 ### `display-workflow-run-url-timeout`
 
@@ -98,7 +100,7 @@ Only available if `wait-for-completion` is `true`
 
 ## Example usage
 
-Workflow in app repo
+Workflow in the source repo where pull request is raised
 
 ```yaml
 name: Workflow Dispatch Trigger
@@ -112,13 +114,13 @@ jobs:
     steps:
       - name: medlypharmacy-workflow-dispatch-trigger
           id: trigger-step
-          uses: medlypharmacy/workflow-dispatch@v2.1.2
+          uses: medlypharmacy/workflow-dispatch@v1.0.0
           with:
             # Required inputs
-            workflow: E2E Tests
+            workflow: e2e.yml
             repo: medlypharmacy/app-e2e
-            token: ${{ secrets.CLONE_MEDLY_PRIVATE_REPOS_TOKEN }}
-            ref: "main" or "master"
+            token: ${{ secrets.GITHUB_TOKEN }}
+            ref: "master"
             repo-name: ${{github.repository}}
             actor-name: ${{github.actor}}
             ref-name: ${{github.ref}}
@@ -131,7 +133,7 @@ jobs:
             wait-for-completion-timeout: 30s
 ```
 
-Workflow in app-e2e repo
+Workflow `e2e.yml` in app-e2e repo
 
 ```yaml
 name: E2E Tests
