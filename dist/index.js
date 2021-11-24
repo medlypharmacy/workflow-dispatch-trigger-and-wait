@@ -8402,7 +8402,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.formatDuration = exports.isTimedOut = exports.sleep = exports.getArgs = void 0;
 const core = __importStar(__webpack_require__(2186));
 const github = __importStar(__webpack_require__(5438));
-const debug_1 = __webpack_require__(1417);
 var TimeUnit;
 (function (TimeUnit) {
     TimeUnit[TimeUnit["S"] = 1000] = "S";
@@ -8413,36 +8412,44 @@ function toMilliseconds(timeWithUnit) {
     const unitStr = timeWithUnit.substr(timeWithUnit.length - 1);
     const unit = TimeUnit[unitStr.toUpperCase()];
     if (!unit) {
-        throw new Error('Unknown time unit ' + unitStr);
+        throw new Error("Unknown time unit " + unitStr);
     }
     const time = parseFloat(timeWithUnit);
     return time * unit;
 }
 function getArgs() {
     // Required inputs
-    const token = core.getInput('token');
-    const workflowRef = core.getInput('workflow');
+    const token = core.getInput("token");
+    const workflowRef = core.getInput("workflow");
     // Optional inputs, with defaults
-    const ref = core.getInput('ref') || github.context.ref;
-    const [owner, repo] = core.getInput('repo')
-        ? core.getInput('repo').split('/')
+    const ref = core.getInput("ref") || github.context.ref;
+    const [owner, repo] = core.getInput("repo")
+        ? core.getInput("repo").split("/")
         : [github.context.repo.owner, github.context.repo.repo];
     // Decode inputs, this MUST be a valid JSON string
     let inputs = {};
-    const inputsJson = core.getInput('inputs');
+    const inputsJson = core.getInput("inputs");
     if (inputsJson) {
         inputs = JSON.parse(inputsJson);
     }
-    inputs = Object.assign(Object.assign({}, inputs), { 'repo-branch': core.getInput('head-ref-name'), "workflow-dispatch-details": "Repo:" + core.getInput('repo-name') + " User:" + core.getInput('actor-name') + " Ref:" + core.getInput('ref-name') + " From:" + core.getInput('head-ref-name') + " -> " + core.getInput('base-ref-name'), "repo-name": core.getInput('repo-name'), "ref-name": core.getInput('ref-name') });
-    debug_1.debug("inputs =>", inputs);
-    const displayWorkflowUrlStr = core.getInput('display-workflow-run-url');
-    const displayWorkflowUrl = displayWorkflowUrlStr && displayWorkflowUrlStr === 'true';
-    const displayWorkflowUrlTimeout = toMilliseconds(core.getInput('display-workflow-run-url-timeout'));
-    const displayWorkflowUrlInterval = toMilliseconds(core.getInput('display-workflow-run-url-interval'));
-    const waitForCompletionStr = core.getInput('wait-for-completion');
-    const waitForCompletion = waitForCompletionStr && waitForCompletionStr === 'true';
-    const waitForCompletionTimeout = toMilliseconds(core.getInput('wait-for-completion-timeout'));
-    const checkStatusInterval = toMilliseconds(core.getInput('wait-for-completion-interval'));
+    inputs = Object.assign(Object.assign({}, inputs), { "repo-branch": core.getInput("head-ref-name"), "workflow-dispatch-details": "Repo:" +
+            core.getInput("repo-name") +
+            " User:" +
+            core.getInput("actor-name") +
+            " Ref:" +
+            core.getInput("ref-name") +
+            " From:" +
+            core.getInput("head-ref-name") +
+            " -> " +
+            core.getInput("base-ref-name"), "repo-name": core.getInput("repo-name"), "ref-name": core.getInput("ref-name") });
+    const displayWorkflowUrlStr = core.getInput("display-workflow-run-url");
+    const displayWorkflowUrl = displayWorkflowUrlStr && displayWorkflowUrlStr === "true";
+    const displayWorkflowUrlTimeout = toMilliseconds(core.getInput("display-workflow-run-url-timeout"));
+    const displayWorkflowUrlInterval = toMilliseconds(core.getInput("display-workflow-run-url-interval"));
+    const waitForCompletionStr = core.getInput("wait-for-completion");
+    const waitForCompletion = waitForCompletionStr && waitForCompletionStr === "true";
+    const waitForCompletionTimeout = toMilliseconds(core.getInput("wait-for-completion-timeout"));
+    const checkStatusInterval = toMilliseconds(core.getInput("wait-for-completion-interval"));
     return {
         token,
         workflowRef,
@@ -8455,12 +8462,12 @@ function getArgs() {
         displayWorkflowUrlInterval,
         checkStatusInterval,
         waitForCompletion,
-        waitForCompletionTimeout
+        waitForCompletionTimeout,
     };
 }
 exports.getArgs = getArgs;
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 exports.sleep = sleep;
 function isTimedOut(start, waitForCompletionTimeout) {
@@ -8470,11 +8477,11 @@ exports.isTimedOut = isTimedOut;
 function formatDuration(duration) {
     const durationSeconds = duration / 1000;
     const hours = Math.floor(durationSeconds / 3600);
-    const minutes = Math.floor((durationSeconds - (hours * 3600)) / 60);
-    const seconds = durationSeconds - (hours * 3600) - (minutes * 60);
-    let hoursStr = hours + '';
-    let minutesStr = minutes + '';
-    let secondsStr = seconds + '';
+    const minutes = Math.floor((durationSeconds - hours * 3600) / 60);
+    const seconds = durationSeconds - hours * 3600 - minutes * 60;
+    let hoursStr = hours + "";
+    let minutesStr = minutes + "";
+    let secondsStr = seconds + "";
     if (hours < 10) {
         hoursStr = "0" + hoursStr;
     }
@@ -8484,7 +8491,7 @@ function formatDuration(duration) {
     if (seconds < 10) {
         secondsStr = "0" + secondsStr;
     }
-    return hoursStr + 'h ' + minutesStr + 'm ' + secondsStr + 's';
+    return hoursStr + "h " + minutesStr + "m " + secondsStr + "s";
 }
 exports.formatDuration = formatDuration;
 
