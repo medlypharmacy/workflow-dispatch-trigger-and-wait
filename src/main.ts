@@ -5,8 +5,7 @@
 // Workflow Dispatch Action - Main task code
 // ----------------------------------------------------------------------------
 
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import * as core from '@actions/core';
 import { formatDuration, getArgs, isTimedOut, sleep } from './utils';
 import { WorkflowHandler, WorkflowRunConclusion, WorkflowRunResult, WorkflowRunStatus } from './workflow-handler';
 
@@ -19,8 +18,10 @@ async function getFollowUrl(workflowHandler: WorkflowHandler, interval: number, 
     await sleep(interval);
     try {
       const result = await workflowHandler.getWorkflowRunStatus();
+      core.info(`getFollowUrl Result-> ${result}`);
       url = result.url;
     } catch(e) {
+      core.info(`Failed to get workflow url: ${e.message}`);
       core.debug(`Failed to get workflow url: ${e.message}`);
     }
   } while (!url && !isTimedOut(start, timeout));
