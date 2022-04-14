@@ -171,17 +171,21 @@ export class WorkflowHandler {
       return this.workflowId;
     }
     if (this.isFilename(this.workflowRef)) {
+      core.debug(`Reached getWorkflowId isFile`);
       this.workflowId = this.workflowRef;
       core.debug(`Workflow id is: ${this.workflowRef}`);
       return this.workflowId;
     }
     try {
+      core.debug('Reached getWorkflowId try');
       const workflowsResp = await this.octokit.actions.listRepoWorkflows({
         owner: this.owner,
         repo: this.repo
       });
+      core.debug(`workflowsResp-> ${workflowsResp}`);
       const workflows = workflowsResp.data.workflows;
       debug('List Workflows', workflows);
+      core.debug(`List Workflows-> ${workflows}`);
 
       // Locate workflow either by name or id
       const workflowFind = workflows.find((workflow: any) => workflow.name === this.workflowRef || workflow.id.toString() === this.workflowRef);
@@ -190,6 +194,7 @@ export class WorkflowHandler {
       this.workflowId = workflowFind.id as number;
       return this.workflowId;
     } catch(error) {
+      core.debug(`getWorkflowId error-> ${error}`);
       debug('List workflows error', error);
       throw error;
     }
