@@ -8564,9 +8564,11 @@ function getFollowUrl(workflowHandler, interval, timeout) {
             yield utils_1.sleep(interval);
             try {
                 const result = yield workflowHandler.getWorkflowRunStatus();
+                core.info(`getFollowUrl Result-> ${result}`);
                 url = result.url;
             }
             catch (e) {
+                core.info(`Failed to get workflow url: ${e.message}`);
                 core.debug(`Failed to get workflow url: ${e.message}`);
             }
         } while (!url && !utils_1.isTimedOut(start, timeout));
@@ -8844,6 +8846,7 @@ class WorkflowHandler {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const workflowId = yield this.getWorkflowId();
+                core.info(`workflowId: ${workflowId}`);
                 this.triggerDate = Date.now();
                 const dispatchResp = yield this.octokit.actions.createWorkflowDispatch({
                     owner: this.owner,
@@ -8852,9 +8855,11 @@ class WorkflowHandler {
                     ref: this.ref,
                     inputs
                 });
+                core.info(`Workflow Dispatch: ${dispatchResp}`);
                 debug_1.debug('Workflow Dispatch', dispatchResp);
             }
             catch (error) {
+                core.info(`Workflow Dispatch error: ${error}`);
                 debug_1.debug('Workflow Dispatch error', error.message);
                 throw error;
             }
@@ -8864,12 +8869,14 @@ class WorkflowHandler {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const runId = yield this.getWorkflowRunId();
+                core.info(`Workflow runId-> ${runId}`);
                 const response = yield this.octokit.actions.getWorkflowRun({
                     owner: this.owner,
                     repo: this.repo,
                     run_id: runId
                 });
                 debug_1.debug('Workflow Run status', response);
+                core.info(`Workflow Run status-> ${response}`);
                 return {
                     url: response.data.html_url,
                     status: ofStatus(response.data.status),
@@ -8877,6 +8884,7 @@ class WorkflowHandler {
                 };
             }
             catch (error) {
+                core.info(`Workflow Run status error-> ${error}`);
                 debug_1.debug('Workflow Run status error', error);
                 throw error;
             }

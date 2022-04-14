@@ -59,7 +59,7 @@ export class WorkflowHandler {
   async triggerWorkflow(inputs: any) {
     try {
       const workflowId = await this.getWorkflowId();
-      core.info(`workflowId: ${workflowId}`);
+      core.debug(`workflowId: ${workflowId}`);
       this.triggerDate = Date.now();
       const dispatchResp = await this.octokit.actions.createWorkflowDispatch({
         owner: this.owner,
@@ -68,10 +68,10 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.info(`Workflow Dispatch: ${dispatchResp}`);
+      core.debug(`Workflow Dispatch: ${dispatchResp}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
-      core.info(`Workflow Dispatch error: ${error}`);
+      core.debug(`Workflow Dispatch error: ${error}`);
       debug('Workflow Dispatch error', error.message);
       throw error;
     }
@@ -80,14 +80,14 @@ export class WorkflowHandler {
   async getWorkflowRunStatus(): Promise<WorkflowRunResult> {
     try {
       const runId = await this.getWorkflowRunId();
-      core.info(`Workflow runId-> ${runId}`);
+      core.debug(`Workflow runId-> ${runId}`);
       const response = await this.octokit.actions.getWorkflowRun({
         owner: this.owner,
         repo: this.repo,
         run_id: runId
       });
       debug('Workflow Run status', response);
-      core.info(`Workflow Run status-> ${response}`);
+      core.debug(`Workflow Run status-> ${response}`);
 
       return {
         url: response.data.html_url,
@@ -96,7 +96,7 @@ export class WorkflowHandler {
       };
 
     } catch (error) {
-      core.info(`Workflow Run status error-> ${error}`);
+      core.debug(`Workflow Run status error-> ${error}`);
       debug('Workflow Run status error', error);
       throw error;
     }
@@ -138,7 +138,7 @@ export class WorkflowHandler {
         workflow_id: workflowId,
         event: 'workflow_dispatch'
       });
-      debug('List Workflow Runs', response);
+      core.debug('List Workflow Runs', response);
 
       const runs = response.data.workflow_runs
         .filter((r: any) => new Date(r.created_at).setMilliseconds(0) >= this.triggerDate);
@@ -150,7 +150,7 @@ export class WorkflowHandler {
         created_at_ts: new Date(r.created_at).valueOf(),
         triggerDateTs: this.triggerDate
       })));
-  
+
       if (runs.length == 0) {
         throw new Error('Run not found');
       }
@@ -175,7 +175,7 @@ export class WorkflowHandler {
     }
     try {
       const workflowsResp = await this.octokit.actions.listRepoWorkflows({
-        owner: this.owner, 
+        owner: this.owner,
         repo: this.repo
       });
       const workflows = workflowsResp.data.workflows;
