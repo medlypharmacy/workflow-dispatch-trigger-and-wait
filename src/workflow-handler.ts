@@ -68,7 +68,8 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.debug(`Workflow Dispatch: ${dispatchResp.toString()}`);
+      core.debug(`Workflow Dispatch', ${dispatchResp.toString()}`);
+      core.debug(`Workflow Dispatch', ${dispatchResp}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
       core.debug(`Workflow Dispatch error: ${error}`);
@@ -160,6 +161,7 @@ export class WorkflowHandler {
       this.workflowRunId = runs[0].id as number;
       return this.workflowRunId;
     } catch (error) {
+      core.debug(`Get workflow run id error', ${error}`);
       debug('Get workflow run id error', error);
       throw error;
     }
