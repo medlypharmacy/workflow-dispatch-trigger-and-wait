@@ -68,11 +68,11 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.debug(`Workflow Dispatch', ${dispatchResp.toString()}`);
-      core.debug(`Workflow Dispatch', ${dispatchResp}`);
+      core.info(`Workflow Dispatch', ${dispatchResp.toString()}`);
+      core.info(`Workflow Dispatch', ${dispatchResp}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
-      core.debug(`Workflow Dispatch error: ${error}`);
+      core.info(`Workflow Dispatch error: ${error}`);
       debug('Workflow Dispatch error', error.message);
       throw error;
     }
@@ -81,14 +81,14 @@ export class WorkflowHandler {
   async getWorkflowRunStatus(): Promise<WorkflowRunResult> {
     try {
       const runId = await this.getWorkflowRunId();
-      core.debug(`Workflow runId-> ${runId}`);
+      core.info(`Workflow runId-> ${runId}`);
       const response = await this.octokit.actions.getWorkflowRun({
         owner: this.owner,
         repo: this.repo,
         run_id: runId
       });
       debug('Workflow Run status', response);
-      core.debug(`Workflow Run status-> ${response}`);
+      core.info(`Workflow Run status-> ${response}`);
 
       return {
         url: response.data.html_url,
@@ -97,7 +97,7 @@ export class WorkflowHandler {
       };
 
     } catch (error) {
-      core.debug(`Workflow Run status error-> ${error}`);
+      core.info(`Workflow Run status error-> ${error}`);
       debug('Workflow Run status error', error);
       throw error;
     }
