@@ -8928,6 +8928,11 @@ class WorkflowHandler {
                     event: 'workflow_dispatch'
                 });
                 core.debug(`List Workflow Runs', ${response}`);
+                core.debug(`List Workflow Runs', ${response.data.workflow_runs}`);
+                core.debug(`List Workflow Runs total count', ${response.data.total_count}`);
+                response.data.workflow_runs.forEach((entry) => {
+                    core.debug(`################# workflow runs : id = ', ${entry.id}`);
+                });
                 const runs = response.data.workflow_runs
                     .filter((r) => new Date(r.created_at).setMilliseconds(0) >= this.triggerDate);
                 core.debug(`Runs->, ${runs.toString()}`);
