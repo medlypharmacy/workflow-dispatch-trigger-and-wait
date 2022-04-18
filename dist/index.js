@@ -8561,7 +8561,6 @@ function getFollowUrl(workflowHandler, interval, timeout) {
         const start = Date.now();
         let url;
         do {
-            yield utils_1.sleep(interval);
             try {
                 const result = yield workflowHandler.getWorkflowRunStatus();
                 core.info(`getFollowUrl Result-> ${result}`);
@@ -8596,11 +8595,11 @@ function waitForCompletionOrTimeout(workflowHandler, checkStatusInterval, waitFo
 }
 function computeConclusion(start, waitForCompletionTimeout, result) {
     if (utils_1.isTimedOut(start, waitForCompletionTimeout)) {
-        core.info(`Workflow wait timed out`);
+        core.debug(`Workflow wait timed out`);
         core.setOutput('workflow-conclusion', workflow_handler_1.WorkflowRunConclusion.TIMED_OUT);
         throw new Error('Workflow run has failed due to timeout');
     }
-    core.info(`Workflow completed with conclusion=${result === null || result === void 0 ? void 0 : result.conclusion}`);
+    core.debug(`Workflow completed with conclusion=${result === null || result === void 0 ? void 0 : result.conclusion}`);
     const conclusion = result === null || result === void 0 ? void 0 : result.conclusion;
     core.setOutput('workflow-conclusion', conclusion);
     if (conclusion === workflow_handler_1.WorkflowRunConclusion.FAILURE)
@@ -8846,7 +8845,7 @@ class WorkflowHandler {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const workflowId = yield this.getWorkflowId();
-                core.info(`workflowId: ${workflowId}`);
+                core.debug(`workflowId: ${workflowId}`);
                 this.triggerDate = Date.now();
                 const dispatchResp = yield this.octokit.actions.createWorkflowDispatch({
                     owner: this.owner,
@@ -8855,7 +8854,8 @@ class WorkflowHandler {
                     ref: this.ref,
                     inputs
                 });
-                core.info(`Workflow Dispatch: ${dispatchResp}`);
+                core.info(`Workflow Dispatch[0]', ${Object.assign({}, dispatchResp[0])}`);
+                core.info(`Length of Workflow Dispatch array', ${dispatchResp.length}`);
                 debug_1.debug('Workflow Dispatch', dispatchResp);
             }
             catch (error) {
@@ -8920,15 +8920,17 @@ class WorkflowHandler {
             try {
                 core.debug('Get workflow run id');
                 const workflowId = yield this.getWorkflowId();
+                core.debug(`Get workflow run id ${workflowId}`);
                 const response = yield this.octokit.actions.listWorkflowRuns({
                     owner: this.owner,
                     repo: this.repo,
                     workflow_id: workflowId,
                     event: 'workflow_dispatch'
                 });
-                debug_1.debug('List Workflow Runs', response);
+                core.debug(`List Workflow Runs', ${response}`);
                 const runs = response.data.workflow_runs
                     .filter((r) => new Date(r.created_at).setMilliseconds(0) >= this.triggerDate);
+                core.debug(`Runs->, ${runs.toString()}`);
                 debug_1.debug(`Filtered Workflow Runs (after trigger date: ${new Date(this.triggerDate).toISOString()})`, runs.map((r) => ({
                     id: r.id,
                     name: r.name,
@@ -8944,6 +8946,7 @@ class WorkflowHandler {
                 return this.workflowRunId;
             }
             catch (error) {
+                core.error(`Get workflow run id error', ${error}`);
                 debug_1.debug('Get workflow run id error', error);
                 throw error;
             }
@@ -8951,21 +8954,27 @@ class WorkflowHandler {
     }
     getWorkflowId() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.workflowId) {
-                return this.workflowId;
-            }
-            if (this.isFilename(this.workflowRef)) {
-                this.workflowId = this.workflowRef;
-                core.debug(`Workflow id is: ${this.workflowRef}`);
-                return this.workflowId;
-            }
             try {
+                core.debug('Reached getWorkflowId');
+                if (this.workflowId) {
+                    core.debug(`Reached getWorkflowId if ${this.workflowId}`);
+                    return this.workflowId;
+                }
+                if (this.isFilename(this.workflowRef)) {
+                    core.debug('Reached getWorkflowId isFile');
+                    this.workflowId = this.workflowRef;
+                    core.debug(`Workflow id is: ${this.workflowRef}`);
+                    return this.workflowId;
+                }
+                core.debug('Reached getWorkflowId try');
                 const workflowsResp = yield this.octokit.actions.listRepoWorkflows({
                     owner: this.owner,
                     repo: this.repo
                 });
+                core.debug(`workflowsResp-> ${workflowsResp}`);
                 const workflows = workflowsResp.data.workflows;
-                debug_1.debug(`List Workflows`, workflows);
+                debug_1.debug('List Workflows', workflows);
+                core.debug(`List Workflows-> ${workflows}`);
                 // Locate workflow either by name or id
                 const workflowFind = workflows.find((workflow) => workflow.name === this.workflowRef || workflow.id.toString() === this.workflowRef);
                 if (!workflowFind)
@@ -8975,6 +8984,7 @@ class WorkflowHandler {
                 return this.workflowId;
             }
             catch (error) {
+                core.error(`getWorkflowId error-> ${error}`);
                 debug_1.debug('List workflows error', error);
                 throw error;
             }
