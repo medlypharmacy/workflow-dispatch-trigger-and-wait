@@ -68,8 +68,7 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.info(`Workflow Dispatch', ${dispatchResp.toString()}`);
-      core.info(`Workflow Dispatch', ${dispatchResp}`);
+      core.info(`Workflow Dispatch', ${{...dispatchResp}}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
       core.info(`Workflow Dispatch error: ${error}`);
@@ -161,7 +160,7 @@ export class WorkflowHandler {
       this.workflowRunId = runs[0].id as number;
       return this.workflowRunId;
     } catch (error) {
-      core.debug(`Get workflow run id error', ${error}`);
+      core.error(`Get workflow run id error', ${error}`);
       debug('Get workflow run id error', error);
       throw error;
     }
@@ -169,18 +168,18 @@ export class WorkflowHandler {
   }
 
   private async getWorkflowId(): Promise<number | string> {
-    core.debug('Reached getWorkflowId');
-    if (this.workflowId) {
-      core.debug(`Reached getWorkflowId if ${this.workflowId}`);
-      return this.workflowId;
-    }
-    if (this.isFilename(this.workflowRef)) {
-      core.debug(`Reached getWorkflowId isFile`);
-      this.workflowId = this.workflowRef;
-      core.debug(`Workflow id is: ${this.workflowRef}`);
-      return this.workflowId;
-    }
     try {
+      core.debug('Reached getWorkflowId');
+      if (this.workflowId) {
+        core.debug(`Reached getWorkflowId if ${this.workflowId}`);
+        return this.workflowId;
+      }
+      if (this.isFilename(this.workflowRef)) {
+        core.debug('Reached getWorkflowId isFile');
+        this.workflowId = this.workflowRef;
+        core.debug(`Workflow id is: ${this.workflowRef}`);
+        return this.workflowId;
+      }
       core.debug('Reached getWorkflowId try');
       const workflowsResp = await this.octokit.actions.listRepoWorkflows({
         owner: this.owner,
@@ -198,7 +197,7 @@ export class WorkflowHandler {
       this.workflowId = workflowFind.id as number;
       return this.workflowId;
     } catch(error) {
-      core.debug(`getWorkflowId error-> ${error}`);
+      core.error(`getWorkflowId error-> ${error}`);
       debug('List workflows error', error);
       throw error;
     }
