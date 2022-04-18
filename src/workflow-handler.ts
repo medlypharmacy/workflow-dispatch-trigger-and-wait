@@ -68,7 +68,8 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.info(`Workflow Dispatch', ${{...dispatchResp}}`);
+      core.info(`Workflow Dispatch[0]', ${{...dispatchResp[0]}}`);
+      core.info(`Length of Workflow Dispatch array', ${dispatchResp.length}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
       core.info(`Workflow Dispatch error: ${error}`);
