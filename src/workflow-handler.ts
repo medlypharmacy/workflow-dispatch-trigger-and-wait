@@ -167,7 +167,9 @@ export class WorkflowHandler {
   }
 
   private async getWorkflowId(): Promise<number | string> {
+    core.debug('Reached getWorkflowId');
     if (this.workflowId) {
+      core.debug(`Reached getWorkflowId if ${this.workflowId}`);
       return this.workflowId;
     }
     if (this.isFilename(this.workflowRef)) {
