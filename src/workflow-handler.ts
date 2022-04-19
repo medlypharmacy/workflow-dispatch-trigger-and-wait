@@ -139,7 +139,7 @@ export class WorkflowHandler {
         owner: this.owner,
         repo: this.repo,
         workflow_id: workflowId,
-        per_page:10,
+        per_page: 10,
       });
       core.debug(`List Workflow Runs', ${response}`);
       core.debug(`List Workflow Runs', ${response.data.workflow_runs}`);
