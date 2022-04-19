@@ -15,9 +15,9 @@ async function getFollowUrl(workflowHandler: WorkflowHandler, interval: number, 
   const start = Date.now()
   let url
   do {
+    await sleep(interval)
     try {
       const result = await workflowHandler.getWorkflowRunStatus()
-      core.info(`getFollowUrl Result-> ${result}`)
       url = result.url
     } catch(e) {
       core.info(`Failed to get workflow url: ${e.message}`)
@@ -46,12 +46,12 @@ async function waitForCompletionOrTimeout(workflowHandler: WorkflowHandler, chec
 
 function computeConclusion(start: number, waitForCompletionTimeout: number, result?: WorkflowRunResult) {
   if (isTimedOut(start, waitForCompletionTimeout)) {
-    core.debug('Workflow wait timed out')
+    core.info('Workflow wait timed out')
     core.setOutput('workflow-conclusion', WorkflowRunConclusion.TIMED_OUT)
     throw new Error('Workflow run has failed due to timeout')
   }
 
-  core.debug(`Workflow completed with conclusion=${result?.conclusion}`)
+  core.info(`Workflow completed with conclusion=${result?.conclusion}`)
   const conclusion = result?.conclusion
   core.setOutput('workflow-conclusion', conclusion)
 
