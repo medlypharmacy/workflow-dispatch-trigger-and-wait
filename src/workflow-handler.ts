@@ -60,7 +60,6 @@ export class WorkflowHandler {
   async triggerWorkflow(inputs: any) {
     try {
       const workflowId = await this.getWorkflowId();
-      core.debug(`workflowId: ${workflowId}`);
       this.triggerDate = Date.now();
       const dispatchResp = await this.octokit.actions.createWorkflowDispatch({
         owner: this.owner,
@@ -69,11 +68,8 @@ export class WorkflowHandler {
         ref: this.ref,
         inputs
       });
-      core.info(`Workflow Dispatch[0]', ${{...dispatchResp[0]}}`);
-      core.info(`Length of Workflow Dispatch array', ${dispatchResp.length}`);
       debug('Workflow Dispatch', dispatchResp);
     } catch (error) {
-      core.info(`Workflow Dispatch error: ${error}`);
       debug('Workflow Dispatch error', error.message);
       throw error;
     }
@@ -82,14 +78,12 @@ export class WorkflowHandler {
   async getWorkflowRunStatus(): Promise<WorkflowRunResult> {
     try {
       const runId = await this.getWorkflowRunId();
-      core.info(`Workflow runId-> ${runId}`);
       const response = await this.octokit.actions.getWorkflowRun({
         owner: this.owner,
         repo: this.repo,
         run_id: runId
       });
       debug('Workflow Run status', response);
-      core.info(`Workflow Run status-> ${response}`);
 
       return {
         url: response.data.html_url,
@@ -98,7 +92,6 @@ export class WorkflowHandler {
       };
 
     } catch (error) {
-      core.info(`Workflow Run status error-> ${error}`);
       debug('Workflow Run status error', error);
       throw error;
     }
@@ -134,7 +127,6 @@ export class WorkflowHandler {
     try {
       core.debug('Get workflow run id');
       const workflowId = await this.getWorkflowId();
-      core.debug(`Get workflow run id ${workflowId}`);
       const response = await this.octokit.actions.listWorkflowRuns({
         owner: this.owner,
         repo: this.repo,
@@ -151,7 +143,6 @@ export class WorkflowHandler {
 
       const runs = response.data.workflow_runs
         .filter((r: any) => new Date(r.created_at).setMilliseconds(0) >= this.triggerDate);
-      core.debug(`Runs->, ${runs.toString()}`);
       debug(`Filtered Workflow Runs (after trigger date: ${new Date(this.triggerDate).toISOString()})`, runs.map((r: any) => ({
         id: r.id,
         name: r.name,
@@ -168,7 +159,6 @@ export class WorkflowHandler {
       this.workflowRunId = runs[0].id as number;
       return this.workflowRunId;
     } catch (error) {
-      core.error(`Get workflow run id error', ${error}`);
       debug('Get workflow run id error', error);
       throw error;
     }
@@ -177,26 +167,20 @@ export class WorkflowHandler {
 
   private async getWorkflowId(): Promise<number | string> {
     try {
-      core.debug('Reached getWorkflowId');
       if (this.workflowId) {
-        core.debug(`Reached getWorkflowId if ${this.workflowId}`);
         return this.workflowId;
       }
       if (this.isFilename(this.workflowRef)) {
-        core.debug('Reached getWorkflowId isFile');
         this.workflowId = this.workflowRef;
         core.debug(`Workflow id is: ${this.workflowRef}`);
         return this.workflowId;
       }
-      core.debug('Reached getWorkflowId try');
       const workflowsResp = await this.octokit.actions.listRepoWorkflows({
         owner: this.owner,
         repo: this.repo
       });
-      core.debug(`workflowsResp-> ${workflowsResp}`);
       const workflows = workflowsResp.data.workflows;
       debug('List Workflows', workflows);
-      core.debug(`List Workflows-> ${workflows}`);
 
       // Locate workflow either by name or id
       const workflowFind = workflows.find((workflow: any) => workflow.name === this.workflowRef || workflow.id.toString() === this.workflowRef);
@@ -205,7 +189,6 @@ export class WorkflowHandler {
       this.workflowId = workflowFind.id as number;
       return this.workflowId;
     } catch(error) {
-      core.error(`getWorkflowId error-> ${error}`);
       debug('List workflows error', error);
       throw error;
     }
