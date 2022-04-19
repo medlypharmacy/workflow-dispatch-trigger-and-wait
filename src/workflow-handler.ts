@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/semi */
 
 import * as core from '@actions/core'
 import * as github from '@actions/github'
@@ -138,7 +139,7 @@ export class WorkflowHandler {
         owner: this.owner,
         repo: this.repo,
         workflow_id: workflowId,
-        event: 'workflow_dispatch'
+        per_page:10,
       });
       core.debug(`List Workflow Runs', ${response}`);
       core.debug(`List Workflow Runs', ${response.data.workflow_runs}`);
