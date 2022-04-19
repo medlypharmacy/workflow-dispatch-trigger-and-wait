@@ -8595,7 +8595,7 @@ function waitForCompletionOrTimeout(workflowHandler, checkStatusInterval, waitFo
 }
 function computeConclusion(start, waitForCompletionTimeout, result) {
     if (utils_1.isTimedOut(start, waitForCompletionTimeout)) {
-        core.debug(`Workflow wait timed out`);
+        core.debug('Workflow wait timed out');
         core.setOutput('workflow-conclusion', workflow_handler_1.WorkflowRunConclusion.TIMED_OUT);
         throw new Error('Workflow run has failed due to timeout');
     }
@@ -8619,7 +8619,7 @@ function run() {
             const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref);
             // Trigger workflow run
             yield workflowHandler.triggerWorkflow(args.inputs);
-            core.info(`Workflow triggered 🚀`);
+            core.info('Workflow triggered 🚀');
             if (args.displayWorkflowUrl) {
                 const url = yield getFollowUrl(workflowHandler, args.displayWorkflowUrlInterval, args.displayWorkflowUrlTimeout);
                 core.info(`You can follow the running workflow here: ${url}`);
@@ -8628,7 +8628,7 @@ function run() {
             if (!args.waitForCompletion) {
                 return;
             }
-            core.info(`Waiting for workflow completion`);
+            core.info('Waiting for workflow completion');
             const { result, start } = yield waitForCompletionOrTimeout(workflowHandler, args.checkStatusInterval, args.waitForCompletionTimeout);
             core.setOutput('workflow-url', result === null || result === void 0 ? void 0 : result.url);
             computeConclusion(start, args.waitForCompletionTimeout, result);
@@ -8705,8 +8705,8 @@ function getArgs() {
     if (inputsJson) {
         inputs = JSON.parse(inputsJson);
     }
-    inputs = Object.assign(Object.assign({}, inputs), { 'repo-branch': core.getInput('head-ref-name'), "workflow-dispatch-details": "Repo:" + core.getInput('repo-name') + " User:" + core.getInput('actor-name') + " Ref:" + core.getInput('ref-name') + " From:" + core.getInput('head-ref-name') + " -> " + core.getInput('base-ref-name'), "repo-name": core.getInput('repo-name'), "ref-name": core.getInput('ref-name') });
-    debug_1.debug("inputs =>", inputs);
+    inputs = Object.assign(Object.assign({}, inputs), { 'repo-branch': core.getInput('head-ref-name'), 'workflow-dispatch-details': 'Repo:' + core.getInput('repo-name') + ' User:' + core.getInput('actor-name') + ' Ref:' + core.getInput('ref-name') + ' From:' + core.getInput('head-ref-name') + ' -> ' + core.getInput('base-ref-name'), 'repo-name': core.getInput('repo-name'), 'ref-name': core.getInput('ref-name') });
+    debug_1.debug('inputs =>', inputs);
     const displayWorkflowUrlStr = core.getInput('display-workflow-run-url');
     const displayWorkflowUrl = displayWorkflowUrlStr && displayWorkflowUrlStr === 'true';
     const displayWorkflowUrlTimeout = toMilliseconds(core.getInput('display-workflow-run-url-timeout'));
@@ -8748,13 +8748,13 @@ function formatDuration(duration) {
     let minutesStr = minutes + '';
     let secondsStr = seconds + '';
     if (hours < 10) {
-        hoursStr = "0" + hoursStr;
+        hoursStr = '0' + hoursStr;
     }
     if (minutes < 10) {
-        minutesStr = "0" + minutesStr;
+        minutesStr = '0' + minutesStr;
     }
     if (seconds < 10) {
-        secondsStr = "0" + secondsStr;
+        secondsStr = '0' + secondsStr;
     }
     return hoursStr + 'h ' + minutesStr + 'm ' + secondsStr + 's';
 }
@@ -8926,7 +8926,7 @@ class WorkflowHandler {
                     owner: this.owner,
                     repo: this.repo,
                     workflow_id: workflowId,
-                    event: 'workflow_dispatch'
+                    per_page: 10,
                 });
                 core.debug(`List Workflow Runs', ${response}`);
                 core.debug(`List Workflow Runs', ${response.data.workflow_runs}`);
